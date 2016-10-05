@@ -1,9 +1,10 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 MAINTAINER Michele Bologna <michele.bologna@gmail.com>
 
-RUN apt-get install -qqy wget && \
-	wget -O - https://repo.saltstack.com/apt/ubuntu/ubuntu14/latest/SALTSTACK-GPG-KEY.pub | sudo apt-key add - && \
-	echo "deb http://repo.saltstack.com/apt/ubuntu/ubuntu14/latest trusty main" >> /etc/apt/sources.list && \
+RUN apt-get update && \
+	apt-get install -qqy wget && \
+	wget -O - https://repo.saltstack.com/apt/ubuntu/16.04/amd64/latest/SALTSTACK-GPG-KEY.pub | apt-key add - && \
+	echo "deb http://repo.saltstack.com/apt/ubuntu/16.04/amd64/latest xenial main" >> /etc/apt/sources.list && \
 	apt-get update && \
 	apt-get install -qqy salt-minion && \
     apt-get clean && \
