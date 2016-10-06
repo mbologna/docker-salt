@@ -15,7 +15,7 @@ In this way, the two images are standard and can be customized by specifing a vo
 
 ## Base Docker image
 
-* ubuntu/14.04
+* ubuntu/16.04
 
 ## Installation
 
