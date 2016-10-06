@@ -47,7 +47,7 @@ In this way, the two images are standard and can be customized by specifing a vo
 ### run saltstack-minion2
 
 	% docker run -d --name saltminion2 \
-	--link saltmaster \ 
+	--link saltmaster \
 	-v `pwd`/etc_minion2/salt:/etc/salt mbologna/saltstack-minion
 
 ### have fun!
