@@ -1,14 +1,8 @@
-FROM ubuntu:16.04
-MAINTAINER Michele Bologna <michele.bologna@gmail.com>
+FROM opensuse:42.2
+MAINTAINER Michele Bologna <michele.bologna@suse.com>
 
-RUN apt-get update && \
-	apt-get install -qqy wget && \
-	wget -O - https://repo.saltstack.com/apt/ubuntu/16.04/amd64/latest/SALTSTACK-GPG-KEY.pub | apt-key add - && \
-	echo "deb http://repo.saltstack.com/apt/ubuntu/16.04/amd64/latest xenial main" >> /etc/apt/sources.list && \
-	apt-get update && \
-	apt-get install -qqy salt-minion && \
-    apt-get clean && \
-    rm -fr /var/lib/apt/lists/*
+RUN zypper --non-interactive in -y salt-minion && \
+	zypper clean
 
 VOLUME ["/etc/salt"]
 CMD ["/usr/bin/salt-minion"]

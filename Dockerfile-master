@@ -1,17 +1,14 @@
-FROM ubuntu:16.04
-MAINTAINER Michele Bologna <michele.bologna@gmail.com>
+FROM opensuse:42.2
+MAINTAINER Michele Bologna <michele.bologna@suse.com>
 
-RUN apt-get update && \
-	apt-get install -qqy wget supervisor && \
-	wget -O - https://repo.saltstack.com/apt/ubuntu/16.04/amd64/latest/SALTSTACK-GPG-KEY.pub | apt-key add - && \
-	echo "deb http://repo.saltstack.com/apt/ubuntu/16.04/amd64/latest xenial main" >> /etc/apt/sources.list && \
-	apt-get update && \
-	apt-get install -qqy salt-master salt-api && \
+RUN zypper --non-interactive addrepo http://download.opensuse.org/repositories/devel:languages:python/openSUSE_Leap_42.2/devel:languages:python.repo && \
+	zypper --non-interactive --no-gpg-checks refresh && \
+	zypper --non-interactive in -y supervisor salt-master salt-api && \
+	zypper clean && \
 	useradd saltdev -p '$6$0BIlOqYqg5Rcuu5A$ojdWZ.aZztdSqPCnqsEE3ViRDcFAZ0MSp0UUvT23GG5mnbUOcalZPh8basKox2wcn4F1if2kfChOO/J1K2boe.' && \
-    apt-get clean && \
-    rm -fr /var/lib/apt/lists/*
+	mkdir /var/run/supervisord/
 
-COPY etc_master/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY etc_master/supervisord.conf /etc/supervisor.d/supervisord.conf
 VOLUME ["/etc/salt"]
 EXPOSE 8000
-CMD ["/usr/bin/supervisord"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor.d/supervisord.conf"]
