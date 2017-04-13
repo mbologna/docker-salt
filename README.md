@@ -56,29 +56,34 @@ Now you can access `saltstack-master` either via NetAPI:
             -d eauth=pam
 ```
 
-	{"return": [{"perms": [".*"], "start": 1446379166.406894, "token": "4072d45939ad1a33ffbe0565ec7d15d0cf2e24c2", "expire": 1446422366.406895, "user": "saltdev", "eauth": "pam"}]}
+```
+{"return": [{"perms": [".*"], "start": 1446379166.406894, "token": "4072d45939ad1a33ffbe0565ec7d15d0cf2e24c2", "expire": 1446422366.406895, "user": "saltdev", "eauth": "pam"}]}
+```
 
 ```bash
 % curl -sS http://localhost:8000 \
-            -b ~/cookies.txt \
-            -H 'Accept: application/json' \
-            -d client=local \
-            -d tgt='*' \
-            -d fun=test.ping
+       -b ~/cookies.txt \
+       -H 'Accept: application/json' \
+       -d client=local \
+       -d tgt='*' \
+       -d fun=test.ping
 ```
 
-	{"return": [{"minion1": true, "minion2": true}]}
-
+```
+{"return": [{"minion1": true, "minion2": true}]}
+```
 
 or via command line:
 
 ```bash
-	% docker exec saltmaster /bin/sh -c "salt '*' test.ping"
+% docker exec saltmaster /bin/sh -c "salt '*' test.ping"
 ```
-	minion1:
-	    True
-	minion2:
-	    True
+```
+minion1:
+  True
+minion2:
+  True
+```
 
 ### (optional) configure additional minions
 
