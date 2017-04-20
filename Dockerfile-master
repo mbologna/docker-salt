@@ -9,6 +9,7 @@ RUN zypper --non-interactive addrepo http://download.opensuse.org/repositories/d
 	mkdir /var/run/supervisord/
 
 COPY etc_master/supervisord.conf /etc/supervisor.d/supervisord.conf
+COPY etc_master/salt/master /etc/salt/master
 VOLUME ["/etc/salt"]
 EXPOSE 8000
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor.d/supervisord.conf"]
