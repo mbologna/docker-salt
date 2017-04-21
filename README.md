@@ -23,7 +23,7 @@ This container works with `supervisord` to automatically launch `salt-master` an
 ### Start `saltstack-master` container
 
 ```bash
-docker run -d --name saltmaster -p 8000:8000 -ti mbologna/saltstack-master
+docker run -d --name saltmaster -v `pwd`/srv/salt:/srv/salt -p 8000:8000 -ti mbologna/saltstack-master
 ```
 
 ### Start `saltstack-minion` container (could be more than one!)
@@ -92,6 +92,58 @@ docker exec saltmaster /bin/sh -c "salt '*' cmd.run 'uname -a'"
   }
   ```
 
+### Applying Salt states
+
+A ````pwd`/srv/salt``` directory has been created during the startup of the `saltmaster` container. Place your SLS state definition in it.
+
+An example follows:
+
+```bash
+% cat srv/salt/tmux.sls
+```
+
+```yaml
+tmux:
+  pkg.installed
+```
+
+Now you can apply the state file to your minions:
+
+```bash
+docker exec saltmaster /bin/sh -c "salt '*' state.apply tmux"
+```
+
+```
+01660b061c25:
+----------
+          ID: tmux
+    Function: pkg.installed
+      Result: True
+     Comment: The following packages were installed/updated: tmux
+     Started: 08:25:58.492203
+    Duration: 9655.747 ms
+     Changes:   
+              ----------
+              libevent-2_0-5:
+                  ----------
+                  new:
+                      2.0.21-6.4
+                  old:
+              tmux:
+                  ----------
+                  new:
+                      2.2-1.3
+                  old:
+
+Summary for 01660b061c25
+------------
+Succeeded: 1 (changed=1)
+Failed:    0
+------------
+Total states run:     1
+Total run time:   9.656 s
+```
+
 ## Caveats and security
 
 * `saltstack-master` exposes port `8000/tcp` (**NO SSL**) in order to consume `salt-api` via its HTTP interface.
@@ -100,3 +152,5 @@ docker exec saltmaster /bin/sh -c "salt '*' cmd.run 'uname -a'"
 
 * `saltstack-master` works with PAM authentication module.
 A `saltdev` user (password: `saltdev`) has been added to the container.
+
+* You must be `root` to write files in `/srv/salt` in the container host.
