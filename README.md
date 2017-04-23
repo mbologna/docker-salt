@@ -94,9 +94,9 @@ docker exec saltmaster /bin/sh -c "salt '*' cmd.run 'uname -a'"
 
 ### Applying Salt states
 
-A ````pwd`/srv/salt``` directory has been created during the startup of the `saltmaster` container. Place your SLS state definition in it.
+A `<pwd>/srv/salt` directory has been created during the startup of the `saltmaster` container. Place your SLS state definition in it.
 
-An example follows:
+A Salt state example follows:
 
 ```bash
 % cat srv/salt/tmux.sls
@@ -107,7 +107,7 @@ tmux:
   pkg.installed
 ```
 
-Now you can apply the state file to your minions:
+Now you can apply defined state file to your minions:
 
 ```bash
 docker exec saltmaster /bin/sh -c "salt '*' state.apply tmux"
