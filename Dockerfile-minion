@@ -4,5 +4,4 @@ MAINTAINER Michele Bologna <michele.bologna@suse.com>
 RUN zypper --non-interactive in -y salt-minion && \
 	zypper clean
 
-VOLUME ["/etc/salt"]
 CMD ["/usr/bin/salt-minion"]
