@@ -10,6 +10,7 @@ RUN zypper --non-interactive addrepo http://download.opensuse.org/repositories/d
 	sed -i -e 's/^user: salt$/user: root/g' /etc/salt/master
 
 COPY etc_master/supervisord.conf /etc/supervisor.d/supervisord.conf
+COPY etc_master/salt/master.d/autoaccept.conf /etc/salt/master.d/
 COPY etc_master/salt/master.d/netapi.conf /etc/salt/master.d/
 
 VOLUME ["/srv/salt"]
