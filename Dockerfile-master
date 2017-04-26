@@ -1,5 +1,5 @@
 FROM opensuse:42.2
-MAINTAINER Michele Bologna <michele.bologna@suse.com>
+MAINTAINER Michele Bologna <michele.bologna@gmail.com>
 
 RUN zypper --non-interactive addrepo http://download.opensuse.org/repositories/devel:languages:python/openSUSE_Leap_42.2/devel:languages:python.repo && \
 	zypper --non-interactive --no-gpg-checks refresh && \

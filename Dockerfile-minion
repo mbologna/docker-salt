@@ -1,5 +1,5 @@
 FROM opensuse:42.2
-MAINTAINER Michele Bologna <michele.bologna@suse.com>
+MAINTAINER Michele Bologna <michele.bologna@gmail.com>
 
 RUN zypper --non-interactive in -y salt-minion && \
 	zypper clean
