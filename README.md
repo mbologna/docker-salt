@@ -4,6 +4,8 @@
 
 This repository contains two **Dockerfile**s of [*SaltStack*](https://http://saltstack.com) for [Docker](https://www.docker.com/)'s automated build published to the public [Docker Hub Registry](https://registry.hub.docker.com/).
 
+![Demo in action](demo/result.gif)
+
 In particular, this repository contains two Docker images:
 
 * [**saltstack-master**](https://registry.hub.docker.com/u/mbologna/saltstack-master): a SaltStack master container image. This salt setup accepts all minions that connects to it and comes with netapi module (cherrypy) enabled.
