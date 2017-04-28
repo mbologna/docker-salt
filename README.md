@@ -25,7 +25,7 @@ This container works with `supervisord` to automatically launch `salt-master` an
 ### Start `saltstack-master` container
 
 ```bash
-docker run -d --name saltmaster -v `pwd`/srv/salt:/srv/salt -p 8000:8000 -ti mbologna/saltstack-master
+docker run -d --hostname saltmaster --name saltmaster -v `pwd`/srv/salt:/srv/salt -p 8000:8000 -ti mbologna/saltstack-master
 ```
 
 ### Start `saltstack-minion` container (could be more than one!)
@@ -33,13 +33,13 @@ docker run -d --name saltmaster -v `pwd`/srv/salt:/srv/salt -p 8000:8000 -ti mbo
 *  You can start one minion...
 
   ```bash
-  docker run -d --name saltminion --link saltmaster:salt mbologna/saltstack-minion
+  docker run -d --hostname saltminion --name saltminion --link saltmaster:salt mbologna/saltstack-minion
   ```
 
 *  or you can deploy an army of minions:
 
   ```bash
-  for i in {1..10}; do docker run -d --name saltminion$i --link saltmaster:salt mbologna/saltstack-minion ; done
+  for i in {1..10}; do docker run -d --hostname saltminion$i --name saltminion$i --link saltmaster:salt mbologna/saltstack-minion ; done
   ```
 
 ### Run Salt via command line
@@ -49,12 +49,12 @@ docker exec saltmaster /bin/sh -c "salt '*' cmd.run 'uname -a'"
 ```
 
 ```
-  2c11ad007398:
-      Linux 2c11ad007398 4.4.57-18.3-default #1 SMP Thu Mar 30 06:39:47 UTC 2017 (39c8557) x86_64 x86_64 x86_64 GNU/Linux
-  270d8ae3f11c:
-      Linux 270d8ae3f11c 4.4.57-18.3-default #1 SMP Thu Mar 30 06:39:47 UTC 2017 (39c8557) x86_64 x86_64 x86_64 GNU/Linux
-  3cdff54e495b:
-      Linux 3cdff54e495b 4.4.57-18.3-default #1 SMP Thu Mar 30 06:39:47 UTC 2017 (39c8557) x86_64 x86_64 x86_64 GNU/Linux
+  saltminion3:
+      Linux saltminion3 4.4.57-18.3-default #1 SMP Thu Mar 30 06:39:47 UTC 2017 (39c8557) x86_64 x86_64 x86_64 GNU/Linux
+  saltminion1:
+      Linux saltminion1 4.4.57-18.3-default #1 SMP Thu Mar 30 06:39:47 UTC 2017 (39c8557) x86_64 x86_64 x86_64 GNU/Linux
+  saltminion2:
+      Linux saltminion2 4.4.57-18.3-default #1 SMP Thu Mar 30 06:39:47 UTC 2017 (39c8557) x86_64 x86_64 x86_64 GNU/Linux
 ```
 ### Run Salt via NetAPI
 
@@ -86,9 +86,9 @@ docker exec saltmaster /bin/sh -c "salt '*' cmd.run 'uname -a'"
   {
     "return": [
       {
-        "2dea7929f17f": " 23:55pm  up 2 days  8:28,  0 users,  load average: 1.31, 1.97, 1.70",
-        "ed30e90b1caa": " 23:55pm  up 2 days  8:28,  0 users,  load average: 1.31, 1.97, 1.70",
-        "3cdff54e495b": " 23:55pm  up 2 days  8:28,  0 users,  load average: 1.31, 1.97, 1.70"
+        "saltminion1": " 23:55pm  up 2 days  8:28,  0 users,  load average: 1.31, 1.97, 1.70",
+        "saltminion2": " 23:55pm  up 2 days  8:28,  0 users,  load average: 1.31, 1.97, 1.70",
+        "saltminion3": " 23:55pm  up 2 days  8:28,  0 users,  load average: 1.31, 1.97, 1.70"
       }
     ]
   }
@@ -112,38 +112,33 @@ tmux:
 Now you can apply defined state file to your minions:
 
 ```bash
-docker exec saltmaster /bin/sh -c "salt '*' state.apply tmux"
+docker exec saltmaster /bin/sh -c "salt saltminion1 state.apply tmux"
 ```
 
 ```
-01660b061c25:
-----------
-          ID: tmux
-    Function: pkg.installed
-      Result: True
-     Comment: The following packages were installed/updated: tmux
-     Started: 08:25:58.492203
-    Duration: 9655.747 ms
-     Changes:   
-              ----------
-              libevent-2_0-5:
-                  ----------
-                  new:
-                      2.0.21-6.4
-                  old:
-              tmux:
-                  ----------
-                  new:
-                      2.2-1.3
-                  old:
+  saltminion1:
+  ----------
+            ID: tmux
+      Function: pkg.installed
+        Result: True
+       Comment: The following packages were installed/updated: tmux
+       Started: 12:25:42.977107
+      Duration: 22305.267 ms
+       Changes:   
+                ----------
+                tmux:
+                    ----------
+                    new:
+                        2.2-1.3
+                    old:
 
-Summary for 01660b061c25
-------------
-Succeeded: 1 (changed=1)
-Failed:    0
-------------
-Total states run:     1
-Total run time:   9.656 s
+  Summary for saltminion1
+  ------------
+  Succeeded: 1 (changed=1)
+  Failed:    0
+  ------------
+  Total states run:     1
+  Total run time:  22.305 s
 ```
 
 ## Caveats and security
