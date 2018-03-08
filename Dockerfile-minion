@@ -1,4 +1,4 @@
-FROM opensuse:42.2
+FROM opensuse:42.3
 MAINTAINER Michele Bologna <michele.bologna@gmail.com>
 
 RUN zypper --non-interactive in -y salt-minion && \
