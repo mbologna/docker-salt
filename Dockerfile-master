@@ -1,7 +1,7 @@
-FROM opensuse:42.2
+FROM opensuse:42.3
 MAINTAINER Michele Bologna <michele.bologna@gmail.com>
 
-RUN zypper --non-interactive addrepo http://download.opensuse.org/repositories/devel:languages:python/openSUSE_Leap_42.2/devel:languages:python.repo && \
+RUN zypper --non-interactive addrepo http://download.opensuse.org/repositories/devel:languages:python/openSUSE_Leap_42.3/devel:languages:python.repo && \
 	zypper --non-interactive --no-gpg-checks refresh && \
 	zypper --non-interactive in -y supervisor salt-master salt-api && \
 	zypper clean && \
