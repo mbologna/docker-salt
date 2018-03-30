@@ -14,7 +14,7 @@ This container works with `supervisord` to automatically launch `salt-master` an
 
 ## Base Docker image
 
-* [opensuse 42.2](https://hub.docker.com/_/opensuse/)
+* [opensuse Tumbleweed](https://hub.docker.com/_/opensuse/)
 
 ## Dependencies
 
