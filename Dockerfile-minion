@@ -1,9 +1,7 @@
 FROM opensuse:tumbleweed
 MAINTAINER Michele Bologna <michele.bologna@gmail.com>
 
-RUN zypper --non-interactive --no-gpg-checks refresh && \
-    zypper --non-interactive up --no-recommends -y && \
-	  zypper --non-interactive in -y salt-minion && \
+RUN zypper --non-interactive in --no-recommends -y salt-minion && \
 	  zypper clean
 
 CMD ["/usr/bin/salt-minion", "-l", "debug"]
