@@ -1,22 +1,16 @@
 FROM opensuse:tumbleweed
 MAINTAINER Michele Bologna <michele.bologna@gmail.com>
 
-RUN zypper --non-interactive --no-gpg-checks refresh && \
-    zypper --non-interactive up --no-recommends -y && \
-	  zypper --non-interactive in -y salt-master salt-api && \
-	  zypper --non-interactive addrepo https://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_Tumbleweed/devel:languages:python.repo && \
-	  zypper --non-interactive --no-gpg-checks refresh && \
-	  zypper --non-interactive in --no-recommends -y supervisor && \
+RUN zypper --non-interactive in --no-recommends -y salt-master salt-api && \
 	  zypper clean && \
 	  useradd saltdev -p '$6$0BIlOqYqg5Rcuu5A$ojdWZ.aZztdSqPCnqsEE3ViRDcFAZ0MSp0UUvT23GG5mnbUOcalZPh8basKox2wcn4F1if2kfChOO/J1K2boe.' && \
-	  mkdir /var/run/supervisord/ && \
 	  sed -i -e 's/^user: salt$/user: root/g' /etc/salt/master
 
-COPY etc_master/supervisord.conf /etc/supervisor.d/supervisord.conf
 COPY etc_master/salt/master.d/autoaccept.conf /etc/salt/master.d/
 COPY etc_master/salt/master.d/netapi.conf /etc/salt/master.d/
+COPY entrypoint-master.sh /entrypoint-master.sh
 
 VOLUME ["/srv/salt"]
 
 EXPOSE 8000
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor.d/supervisord.conf"]
+CMD /entrypoint-master.sh
