@@ -12,5 +12,7 @@ COPY entrypoint-master.sh /entrypoint-master.sh
 
 VOLUME ["/srv/salt"]
 
-EXPOSE 8000
+EXPOSE 4505/tcp
+EXPOSE 4506/tcp
+EXPOSE 8000/tcp
 CMD /entrypoint-master.sh
