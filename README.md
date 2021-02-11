@@ -9,7 +9,7 @@ This repository contains two **Dockerfile**s of [*SaltStack*](https://http://sal
 In particular, this repository contains two Docker images:
 
 * [**saltstack-master**](https://registry.hub.docker.com/u/mbologna/saltstack-master): a SaltStack master container image. This salt setup accepts all minions that connects to it and comes with netapi module (cherrypy) enabled.
-This container works with `supervisord` to automatically launch `salt-master` and `salt-api` daemons.  
+This container works with `supervisord` to automatically launch `salt-master` and `salt-api` daemons.
 * [**saltstack-minion**](https://registry.hub.docker.com/u/mbologna/saltstack-minion): a SaltStack minion container image.
 
 ## Base Docker image
@@ -25,7 +25,7 @@ This container works with `supervisord` to automatically launch `salt-master` an
 ### Start `saltstack-master` container
 
 ```bash
-docker run -d --hostname saltmaster --name saltmaster -v `pwd`/srv/salt:/srv/salt -p 8000:8000 -ti mbologna/saltstack-master
+docker run -d --hostname saltmaster --name saltmaster -v `pwd`/srv/salt:/srv/salt -p 9080:9080 -ti mbologna/saltstack-master
 ```
 
 ### Start `saltstack-minion` container (could be more than one!)
@@ -60,7 +60,7 @@ docker exec saltmaster /bin/sh -c "salt '*' cmd.run 'uname -a'"
 
 1. Get a token to use in all subsequent calls:
   ```bash
-  curl -sS http://localhost:8000/login -c ~/cookies.txt -H 'Accept: application/json' -d username=saltdev -d password=saltdev -d eauth=pam
+  curl -sS http://localhost:9080/login -c ~/cookies.txt -H 'Accept: application/json' -d username=saltdev -d password=saltdev -d eauth=pam
   ```
   ```
   {
@@ -80,7 +80,7 @@ docker exec saltmaster /bin/sh -c "salt '*' cmd.run 'uname -a'"
   ```
 2. Invoke Salt using saved token:
   ```bash
-  curl -sS http://localhost:8000 -b ~/cookies.txt -H 'Accept: application/json' -d client=local -d tgt='*' -d fun=cmd.run -d arg="uptime"
+  curl -sS http://localhost:9080 -b ~/cookies.txt -H 'Accept: application/json' -d client=local -d tgt='*' -d fun=cmd.run -d arg="uptime"
   ```
   ```
   {
@@ -124,7 +124,7 @@ docker exec saltmaster /bin/sh -c "salt saltminion1 state.apply tmux"
        Comment: The following packages were installed/updated: tmux
        Started: 12:25:42.977107
       Duration: 22305.267 ms
-       Changes:   
+       Changes:
                 ----------
                 tmux:
                     ----------
@@ -143,7 +143,7 @@ docker exec saltmaster /bin/sh -c "salt saltminion1 state.apply tmux"
 
 ## Caveats and security
 
-* `saltstack-master` exposes port `8000/tcp` (**NO SSL**) in order to consume `salt-api` via its HTTP interface.
+* `saltstack-master` exposes port `9080/tcp` (**NO SSL**) in order to consume `salt-api` via its HTTP interface.
 
   **WARNING**: your credentials travel in plain-text.
 
