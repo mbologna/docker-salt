@@ -1,4 +1,4 @@
-FROM opensuse:tumbleweed
+FROM opensuse/tumbleweed
 LABEL maintainer="Michele Bologna <mb@michelebologna.net>"
 
 RUN zypper --non-interactive in --no-recommends -y salt-master salt-api && \
@@ -14,5 +14,5 @@ VOLUME ["/srv/salt"]
 
 EXPOSE 4505/tcp
 EXPOSE 4506/tcp
-EXPOSE 8000/tcp
+EXPOSE 9080/tcp
 CMD /entrypoint-master.sh
