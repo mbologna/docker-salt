@@ -4,4 +4,5 @@ LABEL maintainer="Michele Bologna <mb@michelebologna.net>"
 RUN zypper --non-interactive in --no-recommends -y salt-minion && \
 	  zypper clean
 
-CMD ["/usr/bin/salt-minion", "-l", "debug"]
+ENTRYPOINT ["/usr/bin/salt-minion"]
+CMD ["-l", "debug"]
