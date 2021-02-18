@@ -1,0 +1,17 @@
+version: "3"
+services:
+  salt-master:
+    image: mbologna/saltstack-master
+    container_name: salt-master
+    hostname: salt-master
+    volumes:
+      - /srv/salt:/srv/salt
+    ports:
+      - 9080:9080
+  salt-minion:
+    image: mbologna/saltstack-minion
+    links:
+      - "salt-master:salt"
+    depends_on:
+      - salt-master
+
