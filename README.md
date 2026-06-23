@@ -2,74 +2,70 @@
 
 [![Build and Push](https://github.com/mbologna/docker-salt/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/mbologna/docker-salt/actions/workflows/build-and-push.yml)
 
-Docker images of [SaltStack](https://saltproject.io/) built on a pinned
+Ready-to-run [SaltStack](https://saltproject.io/) images built on a pinned
 [openSUSE Leap](https://www.opensuse.org/) base and published to Docker Hub:
 
-* **[`mbologna/saltstack-master`](https://hub.docker.com/r/mbologna/saltstack-master)** —
-  a Salt master that auto-accepts minion keys and exposes the
-  `salt-api` (cherrypy / netapi) interface on port `9080`.
-* **[`mbologna/saltstack-minion`](https://hub.docker.com/r/mbologna/saltstack-minion)** —
-  a Salt minion preconfigured to connect to a master reachable as `salt`.
+| Image | Description |
+| ----- | ----------- |
+| **[`mbologna/saltstack-master`](https://hub.docker.com/r/mbologna/saltstack-master)** | Salt master that auto-accepts minion keys and serves the `salt-api` (cherrypy / netapi) HTTP interface on port `9080`. |
+| **[`mbologna/saltstack-minion`](https://hub.docker.com/r/mbologna/saltstack-minion)** | Salt minion preconfigured to connect to a master reachable as `salt`. |
 
-These images are primarily used as test fixtures for
+Images are tagged `latest`, the detected Salt version (e.g. `3006.0` and `3006`),
+`sha-<commit>`, and semver (`vX.Y.Z`) from git tags.
+
+> **For testing, not production.** salt-api is served over plain HTTP and the
+> images ship a fixed `saltdev` account and auto-accept any minion key. See
+> [SECURITY.md](SECURITY.md).
+
+These images are the test fixtures behind
 [SUSE/salt-netapi-client](https://github.com/SUSE/salt-netapi-client).
 
 ![Demo in action](demo/result.gif)
 
-## Quick start (docker compose)
+## Quick start
 
 ```bash
 docker compose up -d --build
 ```
 
-This starts a master (with `salt-api` on `localhost:9080`) and one minion whose
-key is auto-accepted. Scale the minions:
+This brings up a master (with `salt-api` on `localhost:9080`) and one minion
+whose key is auto-accepted. Scale the minions with:
 
 ```bash
 docker compose up -d --scale salt-minion=3
 ```
 
-## Quick start (docker run)
-
-Start the master:
-
-```bash
-docker run -d --hostname saltmaster --name saltmaster \
-  -v "$(pwd)/srv/salt:/srv/salt" -p 9080:9080 -ti mbologna/saltstack-master
-```
-
-Start one or more minions (linked so the master resolves as `salt`):
+<details>
+<summary>Without compose (<code>docker run</code>)</summary>
 
 ```bash
-docker run -d --hostname saltminion --name saltminion \
-  --link saltmaster:salt mbologna/saltstack-minion
-```
+# Master: salt-api on :9080, states mounted from ./srv/salt
+docker run -d --name saltmaster \
+  -v "$(pwd)/srv/salt:/srv/salt" -p 9080:9080 mbologna/saltstack-master
 
-```bash
-for i in $(seq 1 10); do
-  docker run -d --hostname saltminion$i --name saltminion$i \
-    --link saltmaster:salt mbologna/saltstack-minion
-done
+# Minion(s): --link makes the master resolve as `salt`
+docker run -d --name saltminion1 --link saltmaster:salt mbologna/saltstack-minion
 ```
+</details>
 
 ## Running Salt
 
-Via the command line:
+From the master, over the Salt CLI:
 
 ```bash
 docker exec saltmaster salt '*' test.ping
 docker exec saltmaster salt '*' cmd.run 'uname -a'
 ```
 
-Via the netapi (HTTP) interface:
+Over the netapi (HTTP) interface — PAM auth, user/password `saltdev`/`saltdev`:
 
 ```bash
-# 1. Get a token (PAM auth, user/password: saltdev/saltdev)
+# 1. Authenticate and save the token
 curl -sS http://localhost:9080/login \
   -c ~/cookies.txt -H 'Accept: application/json' \
   -d username=saltdev -d password=saltdev -d eauth=pam
 
-# 2. Use the saved token to run a function
+# 2. Run a function with the saved token
 curl -sS http://localhost:9080 \
   -b ~/cookies.txt -H 'Accept: application/json' \
   -d client=local -d tgt='*' -d fun=cmd.run -d arg=uptime
@@ -77,26 +73,37 @@ curl -sS http://localhost:9080 \
 
 ## Applying Salt states
 
-A `./srv/salt` directory is mounted into the master at `/srv/salt`. Drop your
-SLS files there:
+`./srv/salt` is mounted into the master at `/srv/salt`. Drop SLS files there and
+apply them:
 
 ```bash
 cat srv/salt/tmux.sls
-```
+# tmux:
+#   pkg.installed
 
-```yaml
-tmux:
-  pkg.installed
-```
-
-```bash
 docker exec saltmaster salt saltminion1 state.apply tmux
 ```
+
+## Development
+
+Common tasks are wrapped in a `Makefile`:
+
+```bash
+make build   # build both images
+make test    # end-to-end test: login + test.ping + runner & wheel netapi clients
+make lint    # hadolint + shellcheck + yamllint
+make up      # start the stack          make down  # tear it down
+```
+
+`make test` runs `scripts/integration-test.sh`, the same end-to-end test CI runs
+on every push and pull request. Commits follow
+[Conventional Commits](https://www.conventionalcommits.org/) (enforced by a
+commit hook).
 
 ## Compatibility with salt-netapi-client
 
 `SUSE/salt-netapi-client` consumes these images as GitHub Actions `services`.
-The following is a stable contract — do not change it:
+The following is a **stable contract — do not change it**:
 
 | Property            | Value                                             |
 | ------------------- | ------------------------------------------------- |
@@ -106,61 +113,18 @@ The following is a stable contract — do not change it:
 | Auth                | PAM, user `saltdev`, password `saltdev`, perms `.*` |
 | Master hostname     | minions reach the master as `salt`                |
 
-## Building and testing locally
+Modern Salt (3006+) disables netapi clients by default; this contract is kept
+working by enabling them in `etc_master/salt/master.d/netapi.conf`.
 
-```bash
-# Build both images
-docker compose build
+## Continuous integration
 
-# End-to-end smoke test (build, login, test.ping, runner + wheel clients)
-./scripts/integration-test.sh
-```
+[`build-and-push.yml`](.github/workflows/build-and-push.yml) lints
+(hadolint + yamllint), runs the integration test, then builds both images for
+`linux/amd64`. On pushes to the default branch it also pushes the images to
+Docker Hub and scans them with Trivy; pull requests build and test only.
 
-A `Makefile` wraps the common tasks: `make build`, `make test`, `make up`,
-`make down`, `make logs`, `make lint`. See [CONTRIBUTING.md](CONTRIBUTING.md) for
-the full developer workflow and [SECURITY.md](SECURITY.md) for the test-fixture
-security caveats.
-
-The same script runs in CI on every push and pull request.
-
-## Continuous integration & publishing
-
-`.github/workflows/build-and-push.yml`:
-
-1. lints the Dockerfiles (`hadolint`) and workflow YAML (`yamllint`);
-2. runs the integration test (`scripts/integration-test.sh`);
-3. builds both images for `linux/amd64`;
-4. pushes them to Docker Hub on pushes to the default branch with tags
-   `latest`, `sha-<sha>`, the detected Salt version (e.g. `3006.0` and `3006`),
-   and semver tags from `v*` git tags;
-5. scans the published images with Trivy.
-
-Pull requests build and test only — they do not push.
-
-### Required repository secrets
-
-To publish to Docker Hub, add these in **Settings → Secrets and variables →
-Actions**:
-
-| Secret            | Description                                        |
-| ----------------- | -------------------------------------------------- |
-| `DOCKER_USERNAME` | Docker Hub username (must be `mbologna`)            |
-| `DOCKER_PASSWORD` | Docker Hub access token with read/write permissions |
-
-## Dependency updates
-
-Dependencies (base image, packages, and pinned GitHub Actions) are kept up to
-date by [Renovate](https://docs.renovatebot.com/), inheriting the shared
-[`mbologna/.github`](https://github.com/mbologna/.github) preset via
-`renovate.json`.
-
-## Caveats and security
-
-* The master exposes port `9080/tcp` over **plain HTTP (no SSL)** — credentials
-  travel in clear text. These images are intended for testing, not production.
-* PAM auth uses a baked-in `saltdev` / `saltdev` account. Do not expose these
-  images on untrusted networks.
-* Writing to `/srv/salt` on the host may require `root`.
+Base image, packages, and pinned GitHub Actions are kept current by
+[Renovate](https://docs.renovatebot.com/) via `renovate.json`.
 
 ## License
 
