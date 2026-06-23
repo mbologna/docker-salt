@@ -124,7 +124,7 @@ The same script runs in CI on every push and pull request.
 
 1. lints the Dockerfiles (`hadolint`) and workflow YAML (`yamllint`);
 2. runs the integration test (`scripts/integration-test.sh`);
-3. builds both images for `linux/amd64` and `linux/arm64`;
+3. builds both images for `linux/amd64`;
 4. pushes them to Docker Hub (`latest`, `sha-<sha>`, and semver tags from
    `v*` tags) on pushes to the default branch;
 5. scans the published images with Trivy.
