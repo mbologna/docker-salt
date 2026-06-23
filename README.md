@@ -1,6 +1,7 @@
 # docker-salt — SaltStack master & minion images
 
 [![Build and Push](https://github.com/mbologna/docker-salt/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/mbologna/docker-salt/actions/workflows/build-and-push.yml)
+[![Salt version](https://img.shields.io/docker/v/mbologna/saltstack-master?sort=semver&label=salt&color=00a651)](https://hub.docker.com/r/mbologna/saltstack-master/tags)
 
 Ready-to-run [SaltStack](https://saltproject.io/) images built on a pinned
 [openSUSE Leap](https://www.opensuse.org/) base and published to Docker Hub:
