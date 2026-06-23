@@ -17,5 +17,9 @@ RUN zypper --non-interactive install --no-recommends salt-minion && \
 # `salt` network alias used by docker-compose / the salt-netapi-client CI.
 COPY etc_minion/salt/minion.d/master.conf /etc/salt/minion.d/master.conf
 
+# Consider the minion healthy once it can execute a local function.
+HEALTHCHECK --interval=15s --timeout=15s --start-period=30s --retries=10 \
+    CMD salt-call --local --timeout=10 test.ping || exit 1
+
 ENTRYPOINT ["/usr/bin/salt-minion"]
 CMD ["-l", "debug"]

@@ -112,9 +112,14 @@ The following is a stable contract — do not change it:
 # Build both images
 docker compose build
 
-# End-to-end smoke test (build, login, test.ping)
+# End-to-end smoke test (build, login, test.ping, runner + wheel clients)
 ./scripts/integration-test.sh
 ```
+
+A `Makefile` wraps the common tasks: `make build`, `make test`, `make up`,
+`make down`, `make logs`, `make lint`. See [CONTRIBUTING.md](CONTRIBUTING.md) for
+the full developer workflow and [SECURITY.md](SECURITY.md) for the test-fixture
+security caveats.
 
 The same script runs in CI on every push and pull request.
 
@@ -125,8 +130,9 @@ The same script runs in CI on every push and pull request.
 1. lints the Dockerfiles (`hadolint`) and workflow YAML (`yamllint`);
 2. runs the integration test (`scripts/integration-test.sh`);
 3. builds both images for `linux/amd64`;
-4. pushes them to Docker Hub (`latest`, `sha-<sha>`, and semver tags from
-   `v*` tags) on pushes to the default branch;
+4. pushes them to Docker Hub on pushes to the default branch with tags
+   `latest`, `sha-<sha>`, the detected Salt version (e.g. `3006.0` and `3006`),
+   and semver tags from `v*` git tags;
 5. scans the published images with Trivy.
 
 Pull requests build and test only — they do not push.

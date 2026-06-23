@@ -9,4 +9,5 @@ LICENSE
 renovate.json
 scripts
 docker-compose.yml
+Makefile
 *.md
