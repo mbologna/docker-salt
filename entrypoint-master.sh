@@ -1,36 +1,45 @@
-#!/bin/bash
+#!/usr/bin/env bash
+#
+# Start and supervise salt-master and salt-api in the foreground.
+# If either process exits, stop the other and exit non-zero so the container
+# orchestrator (Docker, compose, GitHub Actions services) can restart it.
+set -euo pipefail
 
-# Start the first process
-/usr/bin/salt-master -d -l debug
-status=$?
-if [ $status -ne 0 ]; then
-  echo "Failed to start salt-master: $status"
-  exit $status
-fi
+MASTER_PID=""
+API_PID=""
 
-# Start the second process
-usr/bin/salt-api -d -l debug
-status=$?
-if [ $status -ne 0 ]; then
-  echo "Failed to start salt-api: $status"
-  exit $status
-fi
+shutdown() {
+    echo "Received shutdown signal, stopping salt services..."
+    if [ -n "$MASTER_PID" ]; then kill "$MASTER_PID" 2>/dev/null || true; fi
+    if [ -n "$API_PID" ]; then kill "$API_PID" 2>/dev/null || true; fi
+    wait 2>/dev/null || true
+    exit 0
+}
+trap shutdown SIGTERM SIGINT
 
-# Naive check runs checks once a minute to see if either of the processes exited.
-# This illustrates part of the heavy lifting you need to do if you want to run
-# more than one service in a container. The container exits with an error
-# if it detects that either of the processes has exited.
-# Otherwise it loops forever, waking up every 60 seconds
+echo "Starting salt-master..."
+/usr/bin/salt-master -l info &
+MASTER_PID=$!
 
-while sleep 60; do
-  ps aux |grep salt-master |grep -q -v grep
-  PROCESS_1_STATUS=$?
-  ps aux |grep salt-api |grep -q -v grep
-  PROCESS_2_STATUS=$?
-  # If the greps above find anything, they exit with 0 status
-  # If they are not both 0, then something is wrong
-  if [ $PROCESS_1_STATUS -ne 0 -o $PROCESS_2_STATUS -ne 0 ]; then
-    echo "One of the processes has already exited."
-    exit 1
-  fi
+echo "Starting salt-api..."
+/usr/bin/salt-api -l info &
+API_PID=$!
+
+echo "salt-master (pid $MASTER_PID) and salt-api (pid $API_PID) started."
+
+# Supervise both processes. Exit as soon as one of them dies.
+while true; do
+    if ! kill -0 "$MASTER_PID" 2>/dev/null; then
+        echo "salt-master (pid $MASTER_PID) has exited."
+        kill "$API_PID" 2>/dev/null || true
+        wait 2>/dev/null || true
+        exit 1
+    fi
+    if ! kill -0 "$API_PID" 2>/dev/null; then
+        echo "salt-api (pid $API_PID) has exited."
+        kill "$MASTER_PID" 2>/dev/null || true
+        wait 2>/dev/null || true
+        exit 1
+    fi
+    sleep 5
 done

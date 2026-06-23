@@ -1,0 +1,12 @@
+# Keep the build context small and reproducible.
+.git
+.gitignore
+.github
+demo
+srv
+README.md
+LICENSE
+renovate.json
+scripts
+docker-compose.yml
+*.md
