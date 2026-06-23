@@ -1,4 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>mbologna/.github//renovate-config.json"]
+  "extends": ["github>mbologna/.github//renovate-config.json"],
+  "packageRules": [
+    {
+      "description": "openSUSE Leap was renumbered 42.x -> 15.x -> 16.x. The legacy 42.x line sorts numerically higher than 15.x/16.x but is actually older, so Renovate otherwise proposes a downgrade to 42.3. Cap below the legacy line so it offers 16.x instead.",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["opensuse/leap"],
+      "allowedVersions": "<42"
+    }
+  ]
 }
