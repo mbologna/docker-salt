@@ -1,6 +1,6 @@
 # SaltStack minion on a pinned openSUSE Leap base.
 # Renovate keeps the base image digest and packages up to date.
-FROM opensuse/leap:15.6
+FROM opensuse/leap:42.3@sha256:271c921a1c84d65467d565e3f1c754b75aa01ceed1a7ac39de4816683c355fd2
 
 LABEL maintainer="Michele Bologna <mb@michelebologna.net>" \
       org.opencontainers.image.title="saltstack-minion" \
