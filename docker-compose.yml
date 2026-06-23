@@ -1,17 +1,29 @@
-version: "3"
 services:
   salt-master:
     image: mbologna/saltstack-master
+    build:
+      context: .
+      dockerfile: Dockerfile-master
     container_name: salt-master
     hostname: salt-master
+    # Expose the master as "salt" so minions reach it by their default master name.
+    networks:
+      default:
+        aliases:
+          - salt
     volumes:
-      - /srv/salt:/srv/salt
+      - ./srv/salt:/srv/salt
     ports:
-      - 9080:9080
+      - "9080:9080"
+
   salt-minion:
     image: mbologna/saltstack-minion
-    links:
-      - "salt-master:salt"
+    build:
+      context: .
+      dockerfile: Dockerfile-minion
     depends_on:
-      - salt-master
+      salt-master:
+        condition: service_healthy
 
+networks:
+  default:

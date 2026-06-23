@@ -1,18 +1,37 @@
-FROM opensuse/tumbleweed
-LABEL maintainer="Michele Bologna <mb@michelebologna.net>"
+# SaltStack master + salt-api (netapi / cherrypy) on a pinned openSUSE Leap base.
+# Renovate keeps the base image digest and packages up to date.
+FROM opensuse/leap:15.6
 
-RUN zypper --non-interactive in --no-recommends -y salt-master salt-api && \
-	  zypper clean && \
-	  useradd saltdev -p '$6$0BIlOqYqg5Rcuu5A$ojdWZ.aZztdSqPCnqsEE3ViRDcFAZ0MSp0UUvT23GG5mnbUOcalZPh8basKox2wcn4F1if2kfChOO/J1K2boe.' && \
-	  sed -i -e 's/^user: salt$/user: root/g' /etc/salt/master
+LABEL maintainer="Michele Bologna <mb@michelebologna.net>" \
+      org.opencontainers.image.title="saltstack-master" \
+      org.opencontainers.image.description="SaltStack master with salt-api (netapi/cherrypy) for testing salt-netapi-client" \
+      org.opencontainers.image.source="https://github.com/mbologna/docker-salt" \
+      org.opencontainers.image.licenses="MIT"
+
+# salt-master + salt-api provide the netapi (cherrypy) interface on port 9080.
+# curl is used by the HEALTHCHECK, shadow provides useradd for the PAM test user.
+# hadolint ignore=DL3037
+RUN zypper --non-interactive install --no-recommends \
+        salt-master \
+        salt-api \
+        curl \
+        shadow && \
+    zypper clean --all && \
+    useradd saltdev -p '$6$0BIlOqYqg5Rcuu5A$ojdWZ.aZztdSqPCnqsEE3ViRDcFAZ0MSp0UUvT23GG5mnbUOcalZPh8basKox2wcn4F1if2kfChOO/J1K2boe.' && \
+    sed -i -e 's/^user: salt$/user: root/g' /etc/salt/master
 
 COPY etc_master/salt/master.d/autoaccept.conf /etc/salt/master.d/
 COPY etc_master/salt/master.d/netapi.conf /etc/salt/master.d/
 COPY entrypoint-master.sh /entrypoint-master.sh
+RUN chmod +x /entrypoint-master.sh
 
 VOLUME ["/srv/salt"]
 
-EXPOSE 4505/tcp
-EXPOSE 4506/tcp
-EXPOSE 9080/tcp
-CMD /entrypoint-master.sh
+# 4505/4506: salt publish/return ports. 9080: salt-api (HTTP, SSL disabled).
+EXPOSE 4505/tcp 4506/tcp 9080/tcp
+
+# Consider the container healthy once salt-api answers on the netapi port.
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=20 \
+    CMD curl -fsS http://localhost:9080/ -o /dev/null || exit 1
+
+CMD ["/entrypoint-master.sh"]

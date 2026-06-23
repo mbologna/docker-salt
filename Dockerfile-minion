@@ -1,8 +1,21 @@
-FROM opensuse/tumbleweed
-LABEL maintainer="Michele Bologna <mb@michelebologna.net>"
+# SaltStack minion on a pinned openSUSE Leap base.
+# Renovate keeps the base image digest and packages up to date.
+FROM opensuse/leap:15.6
 
-RUN zypper --non-interactive in --no-recommends -y salt-minion && \
-	  zypper clean
+LABEL maintainer="Michele Bologna <mb@michelebologna.net>" \
+      org.opencontainers.image.title="saltstack-minion" \
+      org.opencontainers.image.description="SaltStack minion preconfigured to reach a master at the host 'salt'" \
+      org.opencontainers.image.source="https://github.com/mbologna/docker-salt" \
+      org.opencontainers.image.licenses="MIT"
+
+# hadolint ignore=DL3037
+RUN zypper --non-interactive install --no-recommends salt-minion && \
+    zypper clean --all
+
+# Explicitly point the minion at a master reachable as "salt".
+# This preserves compatibility with `docker run --link saltmaster:salt` and the
+# `salt` network alias used by docker-compose / the salt-netapi-client CI.
+COPY etc_minion/salt/minion.d/master.conf /etc/salt/minion.d/master.conf
 
 ENTRYPOINT ["/usr/bin/salt-minion"]
 CMD ["-l", "debug"]

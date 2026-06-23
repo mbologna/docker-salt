@@ -1,107 +1,87 @@
-# SaltStack Dockerfiles
+# docker-salt — SaltStack master & minion images
 
-## Introduction
+[![Build and Push](https://github.com/mbologna/docker-salt/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/mbologna/docker-salt/actions/workflows/build-and-push.yml)
 
-This repository contains two **Dockerfile**s of [*SaltStack*](https://http://saltstack.com) for [Docker](https://www.docker.com/)'s automated build published to the public [Docker Hub Registry](https://registry.hub.docker.com/).
+Docker images of [SaltStack](https://saltproject.io/) built on a pinned
+[openSUSE Leap](https://www.opensuse.org/) base and published to Docker Hub:
+
+* **[`mbologna/saltstack-master`](https://hub.docker.com/r/mbologna/saltstack-master)** —
+  a Salt master that auto-accepts minion keys and exposes the
+  `salt-api` (cherrypy / netapi) interface on port `9080`.
+* **[`mbologna/saltstack-minion`](https://hub.docker.com/r/mbologna/saltstack-minion)** —
+  a Salt minion preconfigured to connect to a master reachable as `salt`.
+
+These images are primarily used as test fixtures for
+[SUSE/salt-netapi-client](https://github.com/SUSE/salt-netapi-client).
 
 ![Demo in action](demo/result.gif)
 
-In particular, this repository contains two Docker images:
-
-* [**saltstack-master**](https://registry.hub.docker.com/u/mbologna/saltstack-master): a SaltStack master container image. This salt setup accepts all minions that connects to it and comes with netapi module (cherrypy) enabled.
-This container works with `supervisord` to automatically launch `salt-master` and `salt-api` daemons.
-* [**saltstack-minion**](https://registry.hub.docker.com/u/mbologna/saltstack-minion): a SaltStack minion container image.
-
-## Base Docker image
-
-* [opensuse Tumbleweed](https://hub.docker.com/_/opensuse/)
-
-## Dependencies
-
-* [Docker](https://www.docker.com/)
-
-## Usage
-
-### Start `saltstack-master` container
+## Quick start (docker compose)
 
 ```bash
-docker run -d --hostname saltmaster --name saltmaster -v `pwd`/srv/salt:/srv/salt -p 9080:9080 -ti mbologna/saltstack-master
+docker compose up -d --build
 ```
 
-### Start `saltstack-minion` container (could be more than one!)
-
-*  You can start one minion...
-
-  ```bash
-  docker run -d --hostname saltminion --name saltminion --link saltmaster:salt mbologna/saltstack-minion
-  ```
-
-*  or you can deploy an army of minions:
-
-  ```bash
-  for i in {1..10}; do docker run -d --hostname saltminion$i --name saltminion$i --link saltmaster:salt mbologna/saltstack-minion ; done
-  ```
-
-### Run Salt via command line
+This starts a master (with `salt-api` on `localhost:9080`) and one minion whose
+key is auto-accepted. Scale the minions:
 
 ```bash
-docker exec saltmaster /bin/sh -c "salt '*' cmd.run 'uname -a'"
+docker compose up -d --scale salt-minion=3
 ```
 
-```
-  saltminion3:
-      Linux saltminion3 4.4.57-18.3-default #1 SMP Thu Mar 30 06:39:47 UTC 2017 (39c8557) x86_64 x86_64 x86_64 GNU/Linux
-  saltminion1:
-      Linux saltminion1 4.4.57-18.3-default #1 SMP Thu Mar 30 06:39:47 UTC 2017 (39c8557) x86_64 x86_64 x86_64 GNU/Linux
-  saltminion2:
-      Linux saltminion2 4.4.57-18.3-default #1 SMP Thu Mar 30 06:39:47 UTC 2017 (39c8557) x86_64 x86_64 x86_64 GNU/Linux
-```
-### Run Salt via NetAPI
+## Quick start (docker run)
 
-1. Get a token to use in all subsequent calls:
-  ```bash
-  curl -sS http://localhost:9080/login -c ~/cookies.txt -H 'Accept: application/json' -d username=saltdev -d password=saltdev -d eauth=pam
-  ```
-  ```
-  {
-    "return": [
-    {
-      "perms": [
-      ".*"
-      ],
-      "start": 1446379166.406894,
-      "token": "4072d45939ad1a33ffbe0565ec7d15d0cf2e24c2",
-      "expire": 1446422366.406895,
-      "user": "saltdev",
-      "eauth": "pam"
-    }
-    ]
-  }
-  ```
-2. Invoke Salt using saved token:
-  ```bash
-  curl -sS http://localhost:9080 -b ~/cookies.txt -H 'Accept: application/json' -d client=local -d tgt='*' -d fun=cmd.run -d arg="uptime"
-  ```
-  ```
-  {
-    "return": [
-      {
-        "saltminion1": " 23:55pm  up 2 days  8:28,  0 users,  load average: 1.31, 1.97, 1.70",
-        "saltminion2": " 23:55pm  up 2 days  8:28,  0 users,  load average: 1.31, 1.97, 1.70",
-        "saltminion3": " 23:55pm  up 2 days  8:28,  0 users,  load average: 1.31, 1.97, 1.70"
-      }
-    ]
-  }
-  ```
-
-### Applying Salt states
-
-A `<pwd>/srv/salt` directory has been created during the startup of the `saltmaster` container. Place your SLS state definition in it.
-
-A Salt state example follows:
+Start the master:
 
 ```bash
-% cat srv/salt/tmux.sls
+docker run -d --hostname saltmaster --name saltmaster \
+  -v "$(pwd)/srv/salt:/srv/salt" -p 9080:9080 -ti mbologna/saltstack-master
+```
+
+Start one or more minions (linked so the master resolves as `salt`):
+
+```bash
+docker run -d --hostname saltminion --name saltminion \
+  --link saltmaster:salt mbologna/saltstack-minion
+```
+
+```bash
+for i in $(seq 1 10); do
+  docker run -d --hostname saltminion$i --name saltminion$i \
+    --link saltmaster:salt mbologna/saltstack-minion
+done
+```
+
+## Running Salt
+
+Via the command line:
+
+```bash
+docker exec saltmaster salt '*' test.ping
+docker exec saltmaster salt '*' cmd.run 'uname -a'
+```
+
+Via the netapi (HTTP) interface:
+
+```bash
+# 1. Get a token (PAM auth, user/password: saltdev/saltdev)
+curl -sS http://localhost:9080/login \
+  -c ~/cookies.txt -H 'Accept: application/json' \
+  -d username=saltdev -d password=saltdev -d eauth=pam
+
+# 2. Use the saved token to run a function
+curl -sS http://localhost:9080 \
+  -b ~/cookies.txt -H 'Accept: application/json' \
+  -d client=local -d tgt='*' -d fun=cmd.run -d arg=uptime
+```
+
+## Applying Salt states
+
+A `./srv/salt` directory is mounted into the master at `/srv/salt`. Drop your
+SLS files there:
+
+```bash
+cat srv/salt/tmux.sls
 ```
 
 ```yaml
@@ -109,45 +89,73 @@ tmux:
   pkg.installed
 ```
 
-Now you can apply defined state file to your minions:
+```bash
+docker exec saltmaster salt saltminion1 state.apply tmux
+```
+
+## Compatibility with salt-netapi-client
+
+`SUSE/salt-netapi-client` consumes these images as GitHub Actions `services`.
+The following is a stable contract — do not change it:
+
+| Property            | Value                                             |
+| ------------------- | ------------------------------------------------- |
+| Image names         | `mbologna/saltstack-master`, `mbologna/saltstack-minion` |
+| salt-api port       | `9080/tcp` (HTTP, SSL disabled)                   |
+| Minion key handling | `auto_accept: True`                               |
+| Auth                | PAM, user `saltdev`, password `saltdev`, perms `.*` |
+| Master hostname     | minions reach the master as `salt`                |
+
+## Building and testing locally
 
 ```bash
-docker exec saltmaster /bin/sh -c "salt saltminion1 state.apply tmux"
+# Build both images
+docker compose build
+
+# End-to-end smoke test (build, login, test.ping)
+./scripts/integration-test.sh
 ```
 
-```
-  saltminion1:
-  ----------
-            ID: tmux
-      Function: pkg.installed
-        Result: True
-       Comment: The following packages were installed/updated: tmux
-       Started: 12:25:42.977107
-      Duration: 22305.267 ms
-       Changes:
-                ----------
-                tmux:
-                    ----------
-                    new:
-                        2.2-1.3
-                    old:
+The same script runs in CI on every push and pull request.
 
-  Summary for saltminion1
-  ------------
-  Succeeded: 1 (changed=1)
-  Failed:    0
-  ------------
-  Total states run:     1
-  Total run time:  22.305 s
-```
+## Continuous integration & publishing
+
+`.github/workflows/build-and-push.yml`:
+
+1. lints the Dockerfiles (`hadolint`) and workflow YAML (`yamllint`);
+2. runs the integration test (`scripts/integration-test.sh`);
+3. builds both images for `linux/amd64` and `linux/arm64`;
+4. pushes them to Docker Hub (`latest`, `sha-<sha>`, and semver tags from
+   `v*` tags) on pushes to the default branch;
+5. scans the published images with Trivy.
+
+Pull requests build and test only — they do not push.
+
+### Required repository secrets
+
+To publish to Docker Hub, add these in **Settings → Secrets and variables →
+Actions**:
+
+| Secret            | Description                                        |
+| ----------------- | -------------------------------------------------- |
+| `DOCKER_USERNAME` | Docker Hub username (must be `mbologna`)            |
+| `DOCKER_PASSWORD` | Docker Hub access token with read/write permissions |
+
+## Dependency updates
+
+Dependencies (base image, packages, and pinned GitHub Actions) are kept up to
+date by [Renovate](https://docs.renovatebot.com/), inheriting the shared
+[`mbologna/.github`](https://github.com/mbologna/.github) preset via
+`renovate.json`.
 
 ## Caveats and security
 
-* `saltstack-master` exposes port `9080/tcp` (**NO SSL**) in order to consume `salt-api` via its HTTP interface.
+* The master exposes port `9080/tcp` over **plain HTTP (no SSL)** — credentials
+  travel in clear text. These images are intended for testing, not production.
+* PAM auth uses a baked-in `saltdev` / `saltdev` account. Do not expose these
+  images on untrusted networks.
+* Writing to `/srv/salt` on the host may require `root`.
 
-  **WARNING**: your credentials travel in plain-text.
+## License
 
-* `saltstack-master` works with PAM authentication module.
-A `saltdev` user (password: `saltdev`) has been added to the container.
-
-* You must be `root` to write files in `/srv/salt` in the container host.
+[MIT](LICENSE) © Michele Bologna
