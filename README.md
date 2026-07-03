@@ -1,4 +1,4 @@
-# docker-salt — SaltStack master & minion images
+# docker-salt: SaltStack master & minion images
 
 [![Build and Push](https://github.com/mbologna/docker-salt/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/mbologna/docker-salt/actions/workflows/build-and-push.yml)
 [![Salt version](https://img.shields.io/docker/v/mbologna/saltstack-master?sort=semver&label=salt&color=00a651)](https://hub.docker.com/r/mbologna/saltstack-master/tags)
@@ -58,7 +58,7 @@ docker exec saltmaster salt '*' test.ping
 docker exec saltmaster salt '*' cmd.run 'uname -a'
 ```
 
-Over the netapi (HTTP) interface — PAM auth, user/password `saltdev`/`saltdev`:
+Over the netapi (HTTP) interface, PAM auth, user/password `saltdev`/`saltdev`:
 
 ```bash
 # 1. Authenticate and save the token
@@ -101,10 +101,62 @@ on every push and pull request. Commits follow
 [Conventional Commits](https://www.conventionalcommits.org/) (enforced by a
 commit hook).
 
+## Troubleshooting
+
+### salt-api not responding on localhost:9080
+
+- **Check the container is running**: `docker ps`
+- **Check health status**: `docker inspect saltmaster --format='{{.State.Health.Status}}'`
+  - Wait for `healthy` status (can take 30-60 seconds on first start)
+- **Review logs**: `docker logs saltmaster`
+  - Look for "salt-master (pid ...) and salt-api (pid ...) started."
+
+### Minion not connecting to master
+
+- **Verify network connectivity**: `docker exec saltminion1 ping -c 1 salt`
+  - The master must be reachable as `salt` (hostname)
+- **Check minion logs**: `docker logs saltminion1`
+  - Look for "The master key has changed" or connection errors
+- **Verify auto-accept is enabled**: `docker exec saltmaster cat /etc/salt/master.d/autoaccept.conf`
+  - Should contain `auto_accept: True`
+
+### Authentication failing with saltdev/saltdev
+
+- **Ensure salt-api is ready**: Wait for healthcheck to pass (see above)
+- **Verify PAM configuration**: `docker exec saltmaster cat /etc/pam.d/salt-api`
+- **Check account exists**: `docker exec saltmaster id saltdev`
+- **Review salt-api logs**: `docker logs saltmaster | grep salt-api`
+
+### Integration test fails with "jq: command not found"
+
+The integration test now requires `jq` for JSON parsing:
+
+```bash
+# openSUSE / SUSE Linux Enterprise
+sudo zypper install jq
+
+# Ubuntu/Debian
+sudo apt-get install jq
+
+# Alpine
+apk add jq
+
+# macOS
+brew install jq
+```
+
+### Scale not working with docker compose
+
+If `docker compose up -d --scale salt-minion=3` doesn't create multiple minions:
+
+- Ensure you're using Docker Compose V2 (`docker compose`, not `docker-compose`)
+- Remove any `container_name` from the minion service in `docker-compose.yml`
+- Check that ports aren't conflicting
+
 ## Compatibility with salt-netapi-client
 
 `SUSE/salt-netapi-client` consumes these images as GitHub Actions `services`.
-The following is a **stable contract — do not change it**:
+The following is a **stable contract (do not change it)**:
 
 | Property            | Value                                             |
 | ------------------- | ------------------------------------------------- |
