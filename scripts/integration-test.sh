@@ -9,18 +9,19 @@
 #   3. A minion registers (key auto-accepted) and answers test.ping -> true.
 #
 # Usage: ./scripts/integration-test.sh
-# Requires: docker (with compose plugin), curl, python3.
+# Requires: docker (with compose plugin), curl, jq.
 set -euo pipefail
 
 API_URL="${API_URL:-http://localhost:9080}"
 SALT_USER="${SALT_USER:-saltdev}"
 SALT_PASSWORD="${SALT_PASSWORD:-saltdev}"
-API_TIMEOUT="${API_TIMEOUT:-60}"    # attempts (x5s) waiting for salt-api
-PING_TIMEOUT="${PING_TIMEOUT:-30}"  # attempts (x5s) waiting for a minion
+SLEEP_INTERVAL="${SLEEP_INTERVAL:-5}"  # seconds between health check attempts
+API_TIMEOUT="${API_TIMEOUT:-60}"       # attempts waiting for salt-api
+PING_TIMEOUT="${PING_TIMEOUT:-30}"     # attempts waiting for a minion
 
 compose() { docker compose "$@"; }
 
-# shellcheck disable=SC2317  # invoked indirectly via the EXIT trap
+# shellcheck disable=SC2317,SC2329  # invoked indirectly via the EXIT trap
 cleanup() {
     rc=$?
     if [ "$rc" -ne 0 ]; then
@@ -39,14 +40,15 @@ compose up -d --build
 echo "== Waiting for salt-api on ${API_URL} =="
 for i in $(seq 1 "$API_TIMEOUT"); do
     if curl -fsS "${API_URL}/" -o /dev/null 2>/dev/null; then
-        echo "salt-api is up (after $((i * 5 - 5))s)"
+        echo "salt-api is up (after $((i * SLEEP_INTERVAL - SLEEP_INTERVAL))s)"
         break
     fi
     if [ "$i" -eq "$API_TIMEOUT" ]; then
-        echo "ERROR: timed out waiting for salt-api"
+        echo "ERROR: timed out waiting for salt-api after ${API_TIMEOUT} attempts"
+        echo "       Last checked URL: ${API_URL}"
         exit 1
     fi
-    sleep 5
+    sleep "$SLEEP_INTERVAL"
 done
 
 echo "== Authenticating as ${SALT_USER} via PAM =="
@@ -55,10 +57,11 @@ TOKEN="$(curl -fsS "${API_URL}/login" \
     -d username="${SALT_USER}" \
     -d password="${SALT_PASSWORD}" \
     -d eauth=pam \
-    | python3 -c 'import sys, json; print(json.load(sys.stdin)["return"][0]["token"])')"
+    | jq -r '.return[0].token')"
 
 if [ -z "${TOKEN}" ]; then
-    echo "ERROR: failed to obtain an auth token"
+    echo "ERROR: failed to obtain an auth token from ${API_URL}/login"
+    echo "       User: ${SALT_USER}, Auth method: PAM"
     exit 1
 fi
 echo "Got auth token: ${TOKEN:0:8}..."
@@ -73,27 +76,24 @@ for i in $(seq 1 "$PING_TIMEOUT"); do
         -d tgt='*' \
         -d fun=test.ping || true)"
 
-    MINION_ID="$(printf '%s' "$RESP" | python3 -c '
-import sys, json
-try:
-    data = json.load(sys.stdin)
-    ret = data.get("return", [{}])[0]
-    ups = [m for m, v in ret.items() if v is True]
-    print(ups[0] if ups else "")
-except Exception:
-    print("")
-' 2>/dev/null || echo "")"
+    MINION_ID="$(printf '%s' "$RESP" | jq -r '
+        .return[0] // {}
+        | to_entries
+        | map(select(.value == true))
+        | .[0].key // ""
+    ' 2>/dev/null || echo "")"
 
     if [ -n "$MINION_ID" ]; then
         echo "PASS [local]: minion '${MINION_ID}' responded True to test.ping"
         break
     fi
     echo "  attempt ${i}/${PING_TIMEOUT}: no minion yet (response: ${RESP})"
-    sleep 5
+    sleep "$SLEEP_INTERVAL"
 done
 
 if [ -z "$MINION_ID" ]; then
-    echo "FAIL: no minion responded to test.ping within the timeout"
+    echo "FAIL: no minion responded to test.ping within ${PING_TIMEOUT} attempts"
+    echo "      Check 'docker compose logs' for minion connection issues"
     exit 1
 fi
 
