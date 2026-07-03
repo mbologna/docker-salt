@@ -1,0 +1,73 @@
+name: Bug Report
+description: File a bug report to help us improve
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+
+        **Note:** These images are test fixtures, not production artifacts. See [SECURITY.md](../SECURITY.md) for intentional security limitations.
+
+  - type: input
+    id: salt-version
+    attributes:
+      label: Salt Version
+      description: What version of Salt are you using? (Check with `docker run mbologna/saltstack-master salt-master --version`)
+      placeholder: "e.g., 3007.2"
+    validations:
+      required: true
+
+  - type: input
+    id: docker-version
+    attributes:
+      label: Docker Version
+      description: What version of Docker are you using?
+      placeholder: "e.g., 24.0.7"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear and concise description of what the bug is.
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: |
+        Please provide detailed steps to reproduce the issue.
+        Include commands, configuration, and any relevant context.
+      placeholder: |
+        1. Run `docker compose up -d`
+        2. Execute `docker exec saltmaster salt '*' test.ping`
+        3. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: Please paste any relevant log output. This will be automatically formatted into code.
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here (environment, custom configuration, etc.)
