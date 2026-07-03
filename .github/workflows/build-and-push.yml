@@ -1,5 +1,11 @@
 name: Build and Push
 
+# This workflow uses a custom implementation instead of mbologna/.github's docker-ci.yml
+# because this project has unique requirements:
+# - Two separate Dockerfiles (master and minion)
+# - Salt version extraction for dynamic image tagging (e.g., 3007, 3007.2)
+# The reusable workflow doesn't currently support custom Dockerfile paths or version extraction.
+
 on:
   push:
     branches:
