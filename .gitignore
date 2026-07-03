@@ -6,7 +6,7 @@
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
 
 # Thumbnails
 ._*
@@ -23,3 +23,23 @@ Temporary Items
 .apdisk
 
 srv/
+
+# Development artifacts
+.env
+.env.local
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Python (from integration tests)
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+*.log
