@@ -171,7 +171,7 @@ jobs:
 
   cache-cleanup:
     if: github.event_name == 'schedule'
-    uses: mbologna/.github/.github/workflows/cache-cleanup.yml@38c3e48cf89560ea2cf773d5fe70b01b37afb2a3 # main
+    uses: mbologna/.github/.github/workflows/cache-cleanup.yml@3d30ecff7fc33d1cbf50ecf619e757c5fda91525 # main
     with:
       max_age_days: 7
     permissions:
