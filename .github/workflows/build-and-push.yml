@@ -39,12 +39,16 @@ jobs:
         with:
           dockerfile: Dockerfile-master
           failure-threshold: error
+          # DL3006/DL3007 stay warning-level by default, which this threshold
+          # ignores. Force them to error so an unpinned/:latest base image fails CI.
+          override-error: DL3006,DL3007
 
       - name: Hadolint (minion)
         uses: hadolint/hadolint-action@06be81baf89a55ffd0e24b8f04a4185738dd3387 # v3.5.0
         with:
           dockerfile: Dockerfile-minion
           failure-threshold: error
+          override-error: DL3006,DL3007
 
       - name: yamllint
         uses: ibiqlik/action-yamllint@2576378a8e339169678f9939646ee3ee325e845c # v3
