@@ -1,0 +1,14 @@
+name: Auto Release
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  auto-release:
+    uses: mbologna/.github/.github/workflows/auto-release.yml@558542c1052a1fb119255853b287ff3b885ba1b0 # main
+    with:
+      strategy: docker
+      image: docker.io/mbologna/saltstack-master
+    secrets: inherit
