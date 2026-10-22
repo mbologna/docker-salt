@@ -25,7 +25,7 @@ jobs:
   # tags reach Docker Hub; other branches stop at GHCR.
   master:
     if: github.event_name != 'schedule'
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@34c6d98db62827e2f7d2255e8f14f68ae640f578 # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@a6a7768c3003d4de83331b7c1eb81b639a866931 # main
     permissions:
       contents: write
       packages: write
@@ -44,7 +44,7 @@ jobs:
 
   minion:
     if: github.event_name != 'schedule'
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@34c6d98db62827e2f7d2255e8f14f68ae640f578 # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@a6a7768c3003d4de83331b7c1eb81b639a866931 # main
     permissions:
       contents: write
       packages: write
@@ -61,7 +61,7 @@ jobs:
 
   cache-cleanup:
     if: github.event_name == 'schedule'
-    uses: mbologna/.github/.github/workflows/cache-cleanup.yml@2bbc9842581590e8160c33efa9a23550932d745d # main
+    uses: mbologna/.github/.github/workflows/cache-cleanup.yml@a6a7768c3003d4de83331b7c1eb81b639a866931 # main
     with:
       max_age_days: 7
     permissions:
