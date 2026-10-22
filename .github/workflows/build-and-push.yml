@@ -28,7 +28,7 @@ env:
 jobs:
   lint:
     name: Lint
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -67,7 +67,7 @@ jobs:
 
   test:
     name: Integration test
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: lint
     permissions:
       contents: read
@@ -79,7 +79,7 @@ jobs:
 
   build:
     name: Build ${{ matrix.image }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [lint, test]
     permissions:
       contents: read
