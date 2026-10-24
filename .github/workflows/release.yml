@@ -7,7 +7,7 @@ on:
 
 jobs:
   auto-release:
-    uses: mbologna/.github/.github/workflows/auto-release.yml@ceb7528f2227aa54fabd34168d25c09724070ec8 # main
+    uses: mbologna/.github/.github/workflows/auto-release.yml@83a94cc1bdc464afe31abb9cb99a575e5a8a38ef # main
     with:
       strategy: docker
       image: docker.io/mbologna/saltstack-master
