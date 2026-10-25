@@ -7,8 +7,16 @@ on:
 
 jobs:
   auto-release:
-    uses: mbologna/.github/.github/workflows/auto-release.yml@ceb7528f2227aa54fabd34168d25c09724070ec8 # main
+    # contents: push the tag and create the Release; actions: start the image
+    # build on it, since a tag pushed with GITHUB_TOKEN triggers no run.
+    permissions:
+      contents: write
+      actions: write
+    uses: mbologna/.github/.github/workflows/auto-release.yml@38f7ca7d59dad7be2dfd5607f8758cd51bb41dd2 # main
     with:
       strategy: docker
       image: docker.io/mbologna/saltstack-master
+      # The images build in build-and-push.yml. Dispatching this workflow on
+      # the tag instead re-ran auto-release there: 995 tags on 2026-10-18.
+      dispatch_workflow: build-and-push.yml
     secrets: inherit

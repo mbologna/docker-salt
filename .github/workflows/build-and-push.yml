@@ -14,6 +14,8 @@ on:
   pull_request:
   schedule:
     - cron: "0 4 * * 0"
+  # auto-release (release.yml) starts the tag build this way.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -25,7 +27,7 @@ jobs:
   # tags reach Docker Hub; other branches stop at GHCR.
   master:
     if: github.event_name != 'schedule'
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@ceb7528f2227aa54fabd34168d25c09724070ec8 # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@38f7ca7d59dad7be2dfd5607f8758cd51bb41dd2 # main
     permissions:
       contents: write
       packages: write
@@ -44,7 +46,7 @@ jobs:
 
   minion:
     if: github.event_name != 'schedule'
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@ceb7528f2227aa54fabd34168d25c09724070ec8 # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@38f7ca7d59dad7be2dfd5607f8758cd51bb41dd2 # main
     permissions:
       contents: write
       packages: write
@@ -61,7 +63,7 @@ jobs:
 
   cache-cleanup:
     if: github.event_name == 'schedule'
-    uses: mbologna/.github/.github/workflows/cache-cleanup.yml@ceb7528f2227aa54fabd34168d25c09724070ec8 # main
+    uses: mbologna/.github/.github/workflows/cache-cleanup.yml@38f7ca7d59dad7be2dfd5607f8758cd51bb41dd2 # main
     with:
       max_age_days: 7
     permissions:
