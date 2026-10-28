@@ -27,7 +27,7 @@ jobs:
   # tags reach Docker Hub; other branches stop at GHCR.
   master:
     if: github.event_name != 'schedule'
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@e0ca3700bd9629e5d400755fbb8bb6e3740d9bf2 # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@eebb1ea28c9615293c30c0d067a91efc88ce3d07 # main
     permissions:
       contents: write
       packages: write
@@ -46,7 +46,7 @@ jobs:
 
   minion:
     if: github.event_name != 'schedule'
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@e0ca3700bd9629e5d400755fbb8bb6e3740d9bf2 # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@eebb1ea28c9615293c30c0d067a91efc88ce3d07 # main
     permissions:
       contents: write
       packages: write
@@ -70,7 +70,7 @@ jobs:
     permissions:
       contents: write
       actions: write
-    uses: mbologna/.github/.github/workflows/auto-release.yml@e0ca3700bd9629e5d400755fbb8bb6e3740d9bf2 # main
+    uses: mbologna/.github/.github/workflows/auto-release.yml@eebb1ea28c9615293c30c0d067a91efc88ce3d07 # main
     with:
       strategy: docker
       image: docker.io/mbologna/saltstack-master
@@ -79,7 +79,7 @@ jobs:
 
   cache-cleanup:
     if: github.event_name == 'schedule'
-    uses: mbologna/.github/.github/workflows/cache-cleanup.yml@e0ca3700bd9629e5d400755fbb8bb6e3740d9bf2 # main
+    uses: mbologna/.github/.github/workflows/cache-cleanup.yml@eebb1ea28c9615293c30c0d067a91efc88ce3d07 # main
     with:
       max_age_days: 7
     permissions:
