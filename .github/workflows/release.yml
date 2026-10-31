@@ -22,7 +22,7 @@ jobs:
       actions: write
     uses: mbologna/.github/.github/workflows/auto-release.yml@ba336cbe198c220e6b1bd08cfe8e4fedbc843bc0 # main
     with:
-      strategy: docker
+      strategy: conventional
       image: docker.io/mbologna/saltstack-master
       # The images build in build-and-push.yml. Dispatching this workflow on
       # the tag instead re-ran auto-release there: 995 tags on 2026-10-18.
