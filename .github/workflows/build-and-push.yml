@@ -72,7 +72,7 @@ jobs:
       actions: write
     uses: mbologna/.github/.github/workflows/auto-release.yml@ba336cbe198c220e6b1bd08cfe8e4fedbc843bc0 # main
     with:
-      strategy: docker
+      strategy: conventional
       image: docker.io/mbologna/saltstack-master
       dispatch_workflow: build-and-push.yml
     secrets: inherit
