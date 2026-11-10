@@ -1,6 +1,6 @@
 # SaltStack master + salt-api (netapi / cherrypy) on a pinned openSUSE Leap base.
 # Renovate keeps the base image digest and packages up to date.
-FROM opensuse/leap:16.0@sha256:a4115e2f5aea9712a7c73974fd94000a034fc3051ef29b5f7722fbf04070dd9d
+FROM opensuse/leap:16.1@sha256:756634f02c733fc52d5c9aa09aca6374c91c53c675dd445743736e13a8428858
 
 LABEL maintainer="Michele Bologna <mb@michelebologna.net>" \
       org.opencontainers.image.title="saltstack-master" \
