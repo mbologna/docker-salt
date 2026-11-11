@@ -20,7 +20,7 @@ jobs:
     permissions:
       contents: write
       actions: write
-    uses: mbologna/.github/.github/workflows/auto-release.yml@717c3959205c8ddcab484d5f92ffccc05352f434 # main
+    uses: mbologna/.github/.github/workflows/auto-release.yml@4ba7c7930fdf79124c856073037b1f20a41ea98e # main
     with:
       strategy: conventional
       image: docker.io/mbologna/saltstack-master
