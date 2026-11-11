@@ -23,11 +23,11 @@ permissions:
 jobs:
   # The images are published as docker.io/<DOCKER_USERNAME>/<image>, which must
   # stay mbologna/saltstack-{master,minion} so existing consumers (e.g.
-  # SUSE/salt-netapi-client) keep working. Only the default branch and release
-  # tags reach Docker Hub; other branches stop at GHCR.
+  # SUSE/salt-netapi-client) keep working. Only release tags publish, to GHCR
+  # and Docker Hub; pull requests build without pushing.
   master:
     if: github.event_name != 'schedule'
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@67d7c1caf42127542e549239033c9010a90716ba # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@92e06b193222ca7eaaa49380dc25e027d4b7987d # main
     permissions:
       contents: write
       packages: write
@@ -36,6 +36,9 @@ jobs:
       security-events: write
     with:
       image_name: saltstack-master
+      # Only release tags publish the image (auto-release dispatches
+      # their build); pull requests build it without pushing.
+      publish: release
       dockerfile: Dockerfile-master
       version_command: salt-master --version | awk '{print $2}'
       push_to_dockerhub: ${{ github.ref_name == github.event.repository.default_branch || startsWith(github.ref, 'refs/tags/') }}
@@ -46,7 +49,7 @@ jobs:
 
   minion:
     if: github.event_name != 'schedule'
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@67d7c1caf42127542e549239033c9010a90716ba # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@92e06b193222ca7eaaa49380dc25e027d4b7987d # main
     permissions:
       contents: write
       packages: write
@@ -55,6 +58,9 @@ jobs:
       security-events: write
     with:
       image_name: saltstack-minion
+      # Only release tags publish the image (auto-release dispatches
+      # their build); pull requests build it without pushing.
+      publish: release
       dockerfile: Dockerfile-minion
       version_command: salt-minion --version | awk '{print $2}'
       push_to_dockerhub: ${{ github.ref_name == github.event.repository.default_branch || startsWith(github.ref, 'refs/tags/') }}
@@ -62,24 +68,25 @@ jobs:
     secrets: inherit
 
   # A push to the default branch releases at once only a CVE fix: the wrapper
-  # runs the security strategy, comparing the last release's image with the
-  # latest just built above. Monday's release and manual runs are release.yml.
+  # runs the security strategy, comparing the base images of both Dockerfiles
+  # with the last release's. Monday's release and manual runs are release.yml.
   security-release:
     if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     needs: [master, minion]
     permissions:
       contents: write
       actions: write
-    uses: mbologna/.github/.github/workflows/auto-release.yml@67d7c1caf42127542e549239033c9010a90716ba # main
+    uses: mbologna/.github/.github/workflows/auto-release.yml@92e06b193222ca7eaaa49380dc25e027d4b7987d # main
     with:
       strategy: conventional
       image: docker.io/mbologna/saltstack-master
+      dockerfiles: Dockerfile-master Dockerfile-minion
       dispatch_workflow: build-and-push.yml
     secrets: inherit
 
   cache-cleanup:
     if: github.event_name == 'schedule'
-    uses: mbologna/.github/.github/workflows/cache-cleanup.yml@67d7c1caf42127542e549239033c9010a90716ba # main
+    uses: mbologna/.github/.github/workflows/cache-cleanup.yml@92e06b193222ca7eaaa49380dc25e027d4b7987d # main
     with:
       max_age_days: 7
     permissions:

@@ -11,8 +11,9 @@ Ready-to-run [SaltStack](https://saltproject.io/) images built on a pinned
 | **[`mbologna/saltstack-master`](https://hub.docker.com/r/mbologna/saltstack-master)** | Salt master that auto-accepts minion keys and serves the `salt-api` (cherrypy / netapi) HTTP interface on port `9080`. |
 | **[`mbologna/saltstack-minion`](https://hub.docker.com/r/mbologna/saltstack-minion)** | Salt minion preconfigured to connect to a master reachable as `salt`. |
 
-Images are tagged `latest`, the detected Salt version (e.g. `3006.0` and `3006`),
-`sha-<commit>`, and semver (`vX.Y.Z`) from git tags.
+Images are published on each release, tagged `latest`, the detected Salt
+version (e.g. `3006.0` and `3006`), `sha-<commit>`, and semver (`vX.Y.Z`) from
+the release's git tag.
 
 > **For testing, not production.** salt-api is served over plain HTTP and the
 > images ship a fixed `saltdev` account and auto-accept any minion key. See
