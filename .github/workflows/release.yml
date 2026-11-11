@@ -20,10 +20,11 @@ jobs:
     permissions:
       contents: write
       actions: write
-    uses: mbologna/.github/.github/workflows/auto-release.yml@67d7c1caf42127542e549239033c9010a90716ba # main
+    uses: mbologna/.github/.github/workflows/auto-release.yml@92e06b193222ca7eaaa49380dc25e027d4b7987d # main
     with:
       strategy: conventional
       image: docker.io/mbologna/saltstack-master
+      dockerfiles: Dockerfile-master Dockerfile-minion
       # The images build in build-and-push.yml. Dispatching this workflow on
       # the tag instead re-ran auto-release there: 995 tags on 2026-10-18.
       dispatch_workflow: build-and-push.yml
