@@ -27,7 +27,7 @@ jobs:
   # and Docker Hub; pull requests build without pushing.
   master:
     if: github.event_name != 'schedule'
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@4ba7c7930fdf79124c856073037b1f20a41ea98e # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@4ab7563caf5d7d861f5275163417627e38eecc0e # main
     permissions:
       contents: write
       packages: write
@@ -43,13 +43,12 @@ jobs:
       version_command: salt-master --version | awk '{print $2}'
       push_to_dockerhub: ${{ github.ref_name == github.event.repository.default_branch || startsWith(github.ref, 'refs/tags/') }}
       enable_integration_test: true
-      enable_release_drafter: true
       yamllint_paths: .github/workflows/ docker-compose.yml
     secrets: inherit
 
   minion:
     if: github.event_name != 'schedule'
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@4ba7c7930fdf79124c856073037b1f20a41ea98e # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@4ab7563caf5d7d861f5275163417627e38eecc0e # main
     permissions:
       contents: write
       packages: write
@@ -76,7 +75,7 @@ jobs:
     permissions:
       contents: write
       actions: write
-    uses: mbologna/.github/.github/workflows/auto-release.yml@4ba7c7930fdf79124c856073037b1f20a41ea98e # main
+    uses: mbologna/.github/.github/workflows/auto-release.yml@4ab7563caf5d7d861f5275163417627e38eecc0e # main
     with:
       strategy: conventional
       image: docker.io/mbologna/saltstack-master
@@ -86,7 +85,7 @@ jobs:
 
   cache-cleanup:
     if: github.event_name == 'schedule'
-    uses: mbologna/.github/.github/workflows/cache-cleanup.yml@4ba7c7930fdf79124c856073037b1f20a41ea98e # main
+    uses: mbologna/.github/.github/workflows/cache-cleanup.yml@4ab7563caf5d7d861f5275163417627e38eecc0e # main
     with:
       max_age_days: 7
     permissions:
