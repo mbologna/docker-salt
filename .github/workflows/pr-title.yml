@@ -12,4 +12,4 @@ permissions:
 
 jobs:
   pr-title:
-    uses: mbologna/.github/.github/workflows/pr-title.yml@67d7c1caf42127542e549239033c9010a90716ba # main
+    uses: mbologna/.github/.github/workflows/pr-title.yml@695e33824ac8363924b3918e2c15b196a3bdd39c # main
