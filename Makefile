@@ -1,4 +1,4 @@
-# docker-salt — common developer tasks
+# saltstack-container — common developer tasks
 #
 # Usage: make <target>
 .DEFAULT_GOAL := help

@@ -60,7 +60,7 @@ representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement via
-[GitHub issues](https://github.com/mbologna/docker-salt/issues).
+[GitHub issues](https://github.com/mbologna/saltstack-container/issues).
 
 All complaints will be reviewed and investigated promptly and fairly.
 

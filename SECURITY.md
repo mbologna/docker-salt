@@ -26,5 +26,5 @@ through routine dependency bumps. Each pushed image is scanned with Trivy in CI.
 
 If you find a security issue in the image build (as opposed to the intentional
 test-fixture behaviour above), please open a
-[private security advisory](https://github.com/mbologna/docker-salt/security/advisories/new)
+[private security advisory](https://github.com/mbologna/saltstack-container/security/advisories/new)
 or a regular issue if it is not sensitive.
