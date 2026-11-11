@@ -5,7 +5,7 @@ FROM opensuse/leap:16.1@sha256:756634f02c733fc52d5c9aa09aca6374c91c53c675dd44574
 LABEL maintainer="Michele Bologna <mb@michelebologna.net>" \
       org.opencontainers.image.title="saltstack-master" \
       org.opencontainers.image.description="SaltStack master with salt-api (netapi/cherrypy) for testing salt-netapi-client" \
-      org.opencontainers.image.source="https://github.com/mbologna/docker-salt" \
+      org.opencontainers.image.source="https://github.com/mbologna/saltstack-container" \
       org.opencontainers.image.licenses="MIT"
 
 # salt-master + salt-api provide the netapi (cherrypy) interface on port 9080.

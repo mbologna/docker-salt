@@ -1,4 +1,4 @@
-# Contributing to docker-salt
+# Contributing to saltstack-container
 
 Thanks for your interest in contributing! These images are test fixtures for
 [salt-netapi-client](https://github.com/SUSE/salt-netapi-client), so please
@@ -25,8 +25,8 @@ brew install hadolint shellcheck jq yamllint
 
 ```bash
 # Clone the repository
-git clone https://github.com/mbologna/docker-salt.git
-cd docker-salt
+git clone https://github.com/mbologna/saltstack-container.git
+cd saltstack-container
 
 # Build both images
 make build
@@ -128,8 +128,8 @@ When opening a PR, please:
 
 ## Questions?
 
-Open a [Discussion](https://github.com/mbologna/docker-salt/discussions) or
-[Issue](https://github.com/mbologna/docker-salt/issues) if you need help!
+Open a [Discussion](https://github.com/mbologna/saltstack-container/discussions) or
+[Issue](https://github.com/mbologna/saltstack-container/issues) if you need help!
 
 ## License
 
