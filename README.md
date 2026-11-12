@@ -16,8 +16,8 @@ version (e.g. `3006.0` and `3006`), `sha-<commit>`, and semver (`vX.Y.Z`) from
 the release's git tag.
 
 > **For testing, not production.** salt-api is served over plain HTTP and the
-> images ship a fixed `saltdev` account and auto-accept any minion key. See
-> [SECURITY.md](SECURITY.md).
+> images ship a fixed `saltdev` account, auto-accept any minion key and run
+> as root. See [SECURITY.md](SECURITY.md) for why.
 
 These images are the test fixtures behind
 [SUSE/salt-netapi-client](https://github.com/SUSE/salt-netapi-client).

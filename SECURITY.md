@@ -13,6 +13,15 @@ By design they are **not hardened**:
   travel in clear text.
 - A fixed PAM account `saltdev` / `saltdev` is baked in.
 - The master **auto-accepts** any minion key (`auto_accept: True`).
+- Both images **run as root**, on purpose. The minion applies states and runs
+  modules that manage the system (packages, services, files), which needs
+  root. The master runs salt-master as `user: root` because salt-api's PAM
+  login for `saltdev` reads `/etc/shadow`; a non-root master would fail that
+  login, which is what salt-netapi-client tests.
+- The packages beyond the openSUSE Leap base are what the `salt`, `salt-master`,
+  `salt-api` and `salt-minion` RPMs require (Python, systemd, sudo, ...); the
+  Dockerfiles add nothing else. `curl` (the master's health check) and `shadow`
+  (`useradd`) already ship in the base image.
 
 Do **not** run these images on untrusted networks or expose port `9080` publicly.
 
