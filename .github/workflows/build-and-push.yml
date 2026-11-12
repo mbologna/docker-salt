@@ -24,7 +24,7 @@ jobs:
   # SUSE/salt-netapi-client) keep working. Only release tags publish, to GHCR
   # and Docker Hub; pull requests build without pushing.
   master:
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@ee5bcf8cd73154eaccd48e386919f73d2dd832e2 # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@8afa698d74ff2cbfdb96ee637825753be6a15aa3 # main
     permissions:
       contents: write
       packages: write
@@ -38,13 +38,18 @@ jobs:
       publish: release
       dockerfile: Dockerfile-master
       version_command: salt-master --version | awk '{print $2}'
+      # Image policy check: the master's salt-api authenticates a PAM user
+      # from /etc/shadow, which only root can read.
+      allow_root: >-
+        test fixture for salt-netapi-client: salt-api authenticates a PAM
+        user from /etc/shadow
       push_to_dockerhub: ${{ github.ref_name == github.event.repository.default_branch || startsWith(github.ref, 'refs/tags/') }}
       enable_integration_test: true
       yamllint_paths: .github/workflows/ docker-compose.yml
     secrets: inherit
 
   minion:
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@ee5bcf8cd73154eaccd48e386919f73d2dd832e2 # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@8afa698d74ff2cbfdb96ee637825753be6a15aa3 # main
     permissions:
       contents: write
       packages: write
@@ -58,6 +63,10 @@ jobs:
       publish: release
       dockerfile: Dockerfile-minion
       version_command: salt-minion --version | awk '{print $2}'
+      # Image policy check: the minion applies states as root.
+      allow_root: >-
+        test fixture for salt-netapi-client: the minion applies states as
+        root
       push_to_dockerhub: ${{ github.ref_name == github.event.repository.default_branch || startsWith(github.ref, 'refs/tags/') }}
       yamllint_paths: .github/workflows/ docker-compose.yml
     secrets: inherit
@@ -71,7 +80,7 @@ jobs:
     permissions:
       contents: write
       actions: write
-    uses: mbologna/.github/.github/workflows/auto-release.yml@ee5bcf8cd73154eaccd48e386919f73d2dd832e2 # main
+    uses: mbologna/.github/.github/workflows/auto-release.yml@8afa698d74ff2cbfdb96ee637825753be6a15aa3 # main
     with:
       strategy: conventional
       image: docker.io/mbologna/saltstack-master
