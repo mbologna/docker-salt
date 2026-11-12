@@ -12,8 +12,6 @@ on:
     tags:
       - "v*"
   pull_request:
-  schedule:
-    - cron: "0 4 * * 0"
   # auto-release (release.yml) starts the tag build this way.
   workflow_dispatch:
 
@@ -26,8 +24,7 @@ jobs:
   # SUSE/salt-netapi-client) keep working. Only release tags publish, to GHCR
   # and Docker Hub; pull requests build without pushing.
   master:
-    if: github.event_name != 'schedule'
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@4ab7563caf5d7d861f5275163417627e38eecc0e # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@5797c3f0e987ee045b00d0a1640dfcdce3c45ce0 # main
     permissions:
       contents: write
       packages: write
@@ -47,8 +44,7 @@ jobs:
     secrets: inherit
 
   minion:
-    if: github.event_name != 'schedule'
-    uses: mbologna/.github/.github/workflows/docker-ci.yml@4ab7563caf5d7d861f5275163417627e38eecc0e # main
+    uses: mbologna/.github/.github/workflows/docker-ci.yml@5797c3f0e987ee045b00d0a1640dfcdce3c45ce0 # main
     permissions:
       contents: write
       packages: write
@@ -75,18 +71,10 @@ jobs:
     permissions:
       contents: write
       actions: write
-    uses: mbologna/.github/.github/workflows/auto-release.yml@4ab7563caf5d7d861f5275163417627e38eecc0e # main
+    uses: mbologna/.github/.github/workflows/auto-release.yml@5797c3f0e987ee045b00d0a1640dfcdce3c45ce0 # main
     with:
       strategy: conventional
       image: docker.io/mbologna/saltstack-master
       dockerfiles: Dockerfile-master Dockerfile-minion
       dispatch_workflow: build-and-push.yml
     secrets: inherit
-
-  cache-cleanup:
-    if: github.event_name == 'schedule'
-    uses: mbologna/.github/.github/workflows/cache-cleanup.yml@4ab7563caf5d7d861f5275163417627e38eecc0e # main
-    with:
-      max_age_days: 7
-    permissions:
-      actions: write
